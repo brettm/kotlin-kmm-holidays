@@ -1,14 +1,14 @@
 import SwiftUI
 import shared
 
-struct HolidayListView<ViewModel: HolidayListViewModelInterface>: View {
+struct HolidayListView: View {
     
-    var viewModel: ViewModel
+    var viewModel: HolidayListViewModel
     
     var body: some View {
         ZStack {
             List {
-                if let content = viewModel.uiState.content() {
+                if let content = viewModel.content {
                     ForEach(Array(content.keys.sorted(by: <)), id: \.self) { key in
                         Section(key) {
                             ForEach(content[key] ?? []) { holiday in
@@ -18,7 +18,7 @@ struct HolidayListView<ViewModel: HolidayListViewModelInterface>: View {
                     }
                 }
             }
-            .refreshable(action: viewModel.updateContent)
+            .refreshable(action: { Task{ viewModel.updateContent() } })
             if case .loading = viewModel.uiState { ProgressView() }
             if case .error(let message) = viewModel.uiState {
                 VStack {
