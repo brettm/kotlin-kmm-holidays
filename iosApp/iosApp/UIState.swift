@@ -1,7 +1,6 @@
 import Foundation
 
 enum UIState<Content> {
-    case notLoaded
     case loading(Content?)
     case loaded(Content)
     case error(String)

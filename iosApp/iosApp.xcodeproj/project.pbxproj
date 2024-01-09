@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,7 @@
 		EC5585932B334ACD00FF5602 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5585922B334ACC00FF5602 /* ViewModel.swift */; };
 		EC8378402B46BEF0004D6ECE /* CountryInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC83783F2B46BEF0004D6ECE /* CountryInfoViewModel.swift */; };
 		EC8378422B46BF0C004D6ECE /* HolidayListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8378412B46BF0C004D6ECE /* HolidayListViewModel.swift */; };
+		EC8378462B4DB78F004D6ECE /* UIState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8378452B4DB78F004D6ECE /* UIState.swift */; };
 		ECD2FF222B3EDCD000089A20 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD2FF212B3EDCD000089A20 /* Helpers.swift */; };
 		ECD98EC82B29CA6E00B77D18 /* HolidayList.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD98EC72B29CA6E00B77D18 /* HolidayList.swift */; };
 /* End PBXBuildFile section */
@@ -41,6 +42,7 @@
 		EC5585922B334ACC00FF5602 /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		EC83783F2B46BEF0004D6ECE /* CountryInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountryInfoViewModel.swift; sourceTree = "<group>"; };
 		EC8378412B46BF0C004D6ECE /* HolidayListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayListViewModel.swift; sourceTree = "<group>"; };
+		EC8378452B4DB78F004D6ECE /* UIState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIState.swift; sourceTree = "<group>"; };
 		ECD2FF212B3EDCD000089A20 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		ECD98EC72B29CA6E00B77D18 /* HolidayList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -84,6 +86,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				EC8378452B4DB78F004D6ECE /* UIState.swift */,
 				EC5585922B334ACC00FF5602 /* ViewModel.swift */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* CountryInfo.swift */,
@@ -133,8 +136,9 @@
 		7555FF73242A565900829871 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1130;
-				LastUpgradeCheck = 1130;
+				LastUpgradeCheck = 1500;
 				ORGANIZATIONNAME = orgName;
 				TargetAttributes = {
 					7555FF7A242A565900829871 = {
@@ -204,6 +208,7 @@
 				ECD2FF222B3EDCD000089A20 /* Helpers.swift in Sources */,
 				EC5585932B334ACD00FF5602 /* ViewModel.swift in Sources */,
 				EC8378422B46BF0C004D6ECE /* HolidayListViewModel.swift in Sources */,
+				EC8378462B4DB78F004D6ECE /* UIState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +252,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -308,6 +314,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
