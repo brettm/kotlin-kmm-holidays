@@ -3,19 +3,13 @@ import shared
 
 struct HolidayListView: View {
     
-    var viewModel: HolidayListViewModel
+    var viewModel: any HolidayListViewModelInterface
     
     var body: some View {
         ZStack {
             List {
-                if let content = viewModel.content {
-                    ForEach(Array(content.keys.sorted(by: <)), id: \.self) { key in
-                        Section(key) {
-                            ForEach(content[key] ?? []) { holiday in
-                                HolidayView(holiday: holiday)
-                            }
-                        }
-                    }
+                if let content = viewModel.holidays {
+                    holidayList(content)
                 }
             }
             .refreshable(action: { Task{ viewModel.updateContent() } })
@@ -31,6 +25,17 @@ struct HolidayListView: View {
         }
         .task {
             viewModel.updateContent()
+        }
+    }
+    
+    @ViewBuilder
+    func holidayList(_ holidays: [String: [PublicHolidayV3Dto]]) -> some View {
+        ForEach(Array(holidays.keys.sorted(by: <)), id: \.self) { key in
+            Section(key) {
+                ForEach(holidays[key] ?? []) { holiday in
+                    HolidayView(holiday: holiday)
+                }
+            }
         }
     }
 }

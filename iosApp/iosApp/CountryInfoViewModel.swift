@@ -7,8 +7,20 @@ enum CountryInfoContentKey: String {
 }
 
 @MainActor
-class CountryInfoViewModel: ViewModel<[CountryInfoContentKey: Any]> {
+protocol CountryViewModelInterface: ViewModelInterface where Content == [CountryInfoContentKey : Any] {
+    var countryInfo: CountryInfoDto? { get }
+    var holidays: [PublicHolidayV3Dto]? { get }
+}
+
+@Observable
+@MainActor
+class CountryInfoViewModel: CountryViewModelInterface, ContentFetching {
+
+    typealias Content = [CountryInfoContentKey : Any]
+    typealias Response = Any
     
+    public var uiState: UIState<Content> = UIState.loading(nil)
+        
     public var countryInfo: CountryInfoDto? {
         return uiState.content()?[.info] as! CountryInfoDto?
     }
@@ -19,8 +31,9 @@ class CountryInfoViewModel: ViewModel<[CountryInfoContentKey: Any]> {
     private let countryClient = HolidayApiFactory.companion.createCountryApi()
     private let holidayClient = HolidayApiFactory.companion.createPublicHolidayApi()
     
-    nonisolated override func fetchContent() async throws -> [CountryInfoContentKey : Any] {
-        return try await withThrowingTaskGroup(of: [CountryInfoContentKey : Any].self) { group in
+    nonisolated func fetchContent() async throws -> Content {
+        return try await withThrowingTaskGroup(of: Content.self) { group in
+
             group.addTask{
                 let countryInfo = try await self.fetchResponse {
                     try await self.countryClient.countryInfoUsingDeviceLocale()
@@ -33,6 +46,7 @@ class CountryInfoViewModel: ViewModel<[CountryInfoContentKey: Any]> {
                 }
                 return [CountryInfoContentKey.holidays: holidays]
             }
+        
             var content: [CountryInfoContentKey : Any] = [:]
             for try await value in group {
                 content.merge(value, uniquingKeysWith: {_, new in new})
