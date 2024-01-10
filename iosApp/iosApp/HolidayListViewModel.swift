@@ -2,40 +2,29 @@ import Foundation
 import shared
 
 @MainActor
-protocol HolidayListViewModelInterface: 
-    ViewModelInterface where Content == [String: [PublicHolidayV3Dto]] 
-{
-    associatedtype Content
+protocol HolidayListViewModelInterface: ViewModelInterface where Content == [String : [PublicHolidayV3Dto]] {
+    var holidays: Content? { get }
 }
 
-@MainActor
 @Observable
-class HolidayListViewModel: HolidayListViewModelInterface {
+@MainActor
+class HolidayListViewModel: HolidayListViewModelInterface, ContentFetching {
+    typealias Content = [String: [PublicHolidayV3Dto]]
+    typealias Response = [PublicHolidayV3Dto]
     
-    var uiState: UIState<Content> = .notLoaded
-   
+    public var uiState: UIState<Content> = UIState.loading(nil)
+
+    public var holidays: [String: [PublicHolidayV3Dto]]? {
+        return uiState.content()
+    }
+    
     private let holidayClient = HolidayApiFactory.companion.createPublicHolidayApi()
     private let holidaySorter = PublicHolidaySorter()
     
-    @Sendable nonisolated func updateContent() {
-        Task {
-            await updateHolidayState()
+    nonisolated func fetchContent() async throws -> Content {
+        let holidays = try await self.fetchResponse {
+            try await self.holidayClient.nextPublicHolidaysWorldwide()
         }
-    }
-    
-    nonisolated private func updateHolidayState() async {
-        Task { @MainActor in uiState = UIState.loading(uiState.content()) }
-        let nextState = await holidayInfoState()
-        Task { @MainActor in uiState = nextState }
-    }
-
-    nonisolated private func holidayInfoState() async -> UIState<Content> {
-       do {
-           let response = try await holidayClient.nextPublicHolidaysWorldwide()
-           if response.success {
-               let info = try await response.body() as! [PublicHolidayV3Dto]
-               return UIState.loaded(holidaySorter.groupHolidays(holidays: info))
-           } else { return .error(String(response.status)) }
-       } catch { return .error(error.localizedDescription) }
+        return holidaySorter.groupHolidays(holidays: holidays as! Response)
     }
 }

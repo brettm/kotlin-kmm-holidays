@@ -1,24 +1,18 @@
 import SwiftUI
 import shared
 
-struct HolidayListView<ViewModel: HolidayListViewModelInterface>: View {
+struct HolidayListView: View {
     
-    var viewModel: ViewModel
+    var viewModel: any HolidayListViewModelInterface
     
     var body: some View {
         ZStack {
             List {
-                if let content = viewModel.uiState.content() {
-                    ForEach(Array(content.keys.sorted(by: <)), id: \.self) { key in
-                        Section(key) {
-                            ForEach(content[key] ?? []) { holiday in
-                                HolidayView(holiday: holiday)
-                            }
-                        }
-                    }
+                if let content = viewModel.holidays {
+                    holidayList(content)
                 }
             }
-            .refreshable(action: viewModel.updateContent)
+            .refreshable(action: { Task{ viewModel.updateContent() } })
             if case .loading = viewModel.uiState { ProgressView() }
             if case .error(let message) = viewModel.uiState {
                 VStack {
@@ -31,6 +25,17 @@ struct HolidayListView<ViewModel: HolidayListViewModelInterface>: View {
         }
         .task {
             viewModel.updateContent()
+        }
+    }
+    
+    @ViewBuilder
+    func holidayList(_ holidays: [String: [PublicHolidayV3Dto]]) -> some View {
+        ForEach(Array(holidays.keys.sorted(by: <)), id: \.self) { key in
+            Section(key) {
+                ForEach(holidays[key] ?? []) { holiday in
+                    HolidayView(holiday: holiday)
+                }
+            }
         }
     }
 }

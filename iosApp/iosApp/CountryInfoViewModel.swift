@@ -7,15 +7,20 @@ enum CountryInfoContentKey: String {
 }
 
 @MainActor
-protocol CountryInfoViewModelInterface: ViewModelInterface where Content == [CountryInfoContentKey: Any] {
-    associatedtype Content
+protocol CountryViewModelInterface: ViewModelInterface where Content == [CountryInfoContentKey : Any] {
+    var countryInfo: CountryInfoDto? { get }
+    var holidays: [PublicHolidayV3Dto]? { get }
 }
 
-@MainActor
 @Observable
-class CountryInfoViewModel: CountryInfoViewModelInterface {
+@MainActor
+class CountryInfoViewModel: CountryViewModelInterface, ContentFetching {
+
+    typealias Content = [CountryInfoContentKey : Any]
+    typealias Response = Any
     
-    public var uiState: UIState<Content> = .notLoaded
+    public var uiState: UIState<Content> = UIState.loading(nil)
+        
     public var countryInfo: CountryInfoDto? {
         return uiState.content()?[.info] as! CountryInfoDto?
     }
@@ -26,42 +31,27 @@ class CountryInfoViewModel: CountryInfoViewModelInterface {
     private let countryClient = HolidayApiFactory.companion.createCountryApi()
     private let holidayClient = HolidayApiFactory.companion.createPublicHolidayApi()
     
-    @Sendable nonisolated func updateContent() {
-        Task {
-            await updateState(nextState: countryInfoState)
-            await updateState(nextState: countryHolidaysState)
-        }
-    }
-    
-    nonisolated private func updateState(nextState: () async -> UIState<Content>) async {
-        Task { @MainActor in uiState = UIState.loading(uiState.content()) }
-        let nextState = await nextState()
-        Task { @MainActor in uiState = nextState }
-    }
-    
-    nonisolated private func fetchContent<T>(
-        mergingContentKey key: CountryInfoContentKey,
-        clientResponse: () async throws -> HttpResponse<T>) async -> UIState<Content>
-    {
-        do {
-            let response = try await clientResponse()
-            if response.success {
-                let info = try await response.body()
-                let content = await uiState.content() ?? [:]
-                return .loaded( content.merging([key: info]){ _, new in new } )
-            } else { return .error(String(response.status)) }
-        } catch { return .error(error.localizedDescription) }
-    }
-    
-    nonisolated private func countryInfoState() async -> UIState<Content> {
-        return await fetchContent(mergingContentKey: .info) {
-            try await countryClient.countryInfoUsingDeviceLocale()
-        }
-    }
-    
-    nonisolated private func countryHolidaysState() async -> UIState<Content>{
-        return await fetchContent(mergingContentKey: .holidays) {
-            try await holidayClient.nextPublicHolidaysUsingDeviceLocale()
+    nonisolated func fetchContent() async throws -> Content {
+        return try await withThrowingTaskGroup(of: Content.self) { group in
+
+            group.addTask{
+                let countryInfo = try await self.fetchResponse {
+                    try await self.countryClient.countryInfoUsingDeviceLocale()
+                }
+                return [CountryInfoContentKey.info: countryInfo]
+            }
+            group.addTask{
+                let holidays = try await self.fetchResponse {
+                    try await self.holidayClient.nextPublicHolidaysUsingDeviceLocale()
+                }
+                return [CountryInfoContentKey.holidays: holidays]
+            }
+        
+            var content: [CountryInfoContentKey : Any] = [:]
+            for try await value in group {
+                content.merge(value, uniquingKeysWith: {_, new in new})
+            }
+            return content
         }
     }
 }

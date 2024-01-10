@@ -2,7 +2,8 @@ import SwiftUI
 import shared
 
 struct CountryInfoView: View {
-    var viewModel: CountryInfoViewModel
+    
+    var viewModel: any CountryViewModelInterface
     
     var body: some View {
         ZStack {
@@ -16,7 +17,9 @@ struct CountryInfoView: View {
                     }
                 }
             }
-            .refreshable(action: viewModel.updateContent)
+            .refreshable(action: {
+                Task { viewModel.updateContent }
+            })
             if case .loading = viewModel.uiState { ProgressView() }
             if case .error(let message) = viewModel.uiState {
                 VStack {
